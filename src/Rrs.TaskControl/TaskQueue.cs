@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Rrs.TaskControl
 {
-    public class TaskQueue : IDisposable
+    public sealed class TaskQueue : IDisposable
     {
         private readonly ConcurrentQueue<IDoSomeWork> _queue = new ConcurrentQueue<IDoSomeWork>();
 

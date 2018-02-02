@@ -7,7 +7,7 @@ namespace Rrs.TaskControl.Pulsable
     /// Core of the pulse worker logic. Provides the framework required to manage a single
     /// thread of execution running a piece of code.
     /// </summary>
-    public abstract class AbstractPulseWorker : IPulseWorker, IDisposable
+    internal abstract class AbstractPulseWorker : IPulseWorker, IDisposable
     {
         private readonly AutoResetEvent _pulseEvent = new AutoResetEvent(false);
         private RegisteredWaitHandle _registeredWaitHandle;

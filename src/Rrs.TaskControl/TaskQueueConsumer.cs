@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Rrs.TaskControl
 {
-    class TaskQueueConsumer : ITaskQueueConsumer
+    internal class TaskQueueConsumer : ITaskQueueConsumer
     {
         public Task ConsumeQueue(ConcurrentQueue<IDoSomeWork> queue)
         {

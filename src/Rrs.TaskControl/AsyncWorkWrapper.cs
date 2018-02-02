@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Rrs.TaskControl
 {
-    class AsyncWorkWrapper : IDoSomeWork
+    internal class AsyncWorkWrapper : IDoSomeWork
     {
         private readonly Func<Task> _a;
         private readonly TaskCompletionSource<object> _tcs = new TaskCompletionSource<object>();
@@ -21,7 +21,7 @@ namespace Rrs.TaskControl
         }
     }
 
-    public class AsyncWorkWrapper<T> : IDoSomeWork
+    internal class AsyncWorkWrapper<T> : IDoSomeWork
     {
         private readonly Func<Task<T>> _f;
         private readonly TaskCompletionSource<T> _tcs = new TaskCompletionSource<T>();

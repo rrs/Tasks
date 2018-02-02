@@ -5,7 +5,7 @@ namespace Rrs.TaskControl.Pulsable
     /// <summary>
     /// Synchronous version of a pulse worker
     /// </summary>
-    public sealed class SyncPulseWorker : AbstractPulseWorker
+    internal sealed class SyncPulseWorker : AbstractPulseWorker
     {
         private readonly IPulsable _pulsable;
 
