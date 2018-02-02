@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Rrs.TaskControl Class Library</Description>
+    <Authors>Robert Snipe</Authors>
+    <Copyright>Copyright (c) 2018 Robert Snipe</Copyright>
+    <TargetFramework>net40</TargetFramework>
+    <AssemblyName>Rrs.TaskControl</AssemblyName>
+    <PackageId>Rrs.TaskControl</PackageId>
+    <PackageTags>TaskControl;Tasks;Net40</PackageTags>
+    <PackageProjectUrl>https://github.com/rrs/TaskShim</PackageProjectUrl>
+    <Version>1.0.0</Version>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Company>rrs</Company>
+  </PropertyGroup>
+</Project>
