@@ -16,7 +16,7 @@ namespace Rrs.TaskControl
         {
             if (queue.TryDequeue(out var workWrapper))
             {
-                workWrapper.Execute().ContinueWith(t => ConsumeQueue(queue));
+                workWrapper.Execute().ContinueWith(t => ConsumeQueueInternal(queue, tcs));
             }
             else
             {
