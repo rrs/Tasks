@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rrs.TaskControl;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -14,7 +15,7 @@ namespace Tests.Rrs.TaskControl
         const int _iterations = 50;
 
         [TestMethod]
-        public async Task TestActionEnqueuMethod()
+        public async Task TestActionEnqueueMethod()
         {
             var queue = new TaskQueue();
 
@@ -25,8 +26,8 @@ namespace Tests.Rrs.TaskControl
             {
                 lastTask = queue.Enqueue(() =>
                 {
-                    colletion.TryAdd(i);
                     Thread.Sleep(_delay);
+                    colletion.TryAdd(i);
                 });
             }
 
@@ -36,7 +37,7 @@ namespace Tests.Rrs.TaskControl
         }
 
         [TestMethod]
-        public async Task TestFuncEnqueuMethod()
+        public async Task TestFuncEnqueueMethod()
         {
             var queue = new TaskQueue();
 
@@ -61,7 +62,7 @@ namespace Tests.Rrs.TaskControl
         }
 
         [TestMethod]
-        public async Task TestTaskFuncEnqueuMethod()
+        public async Task TestTaskFuncEnqueueMethod()
         {
             var queue = new TaskQueue();
 
@@ -69,8 +70,8 @@ namespace Tests.Rrs.TaskControl
 
             async Task addToQueue(int n)
             {
-                colletion.Add(n);
                 await Task.Delay(_delay);
+                colletion.Add(n);
             }
 
             var lastTask = Task.CompletedTask;
@@ -86,7 +87,7 @@ namespace Tests.Rrs.TaskControl
         }
 
         [TestMethod]
-        public async Task TestTypedTaskFuncEnqueuMethod()
+        public async Task TestTypedTaskFuncEnqueueMethod()
         {
             var queue = new TaskQueue();
 
@@ -108,6 +109,33 @@ namespace Tests.Rrs.TaskControl
             await lastTask;
 
             ValidateCollection(colletion);
+        }
+
+        // not sure what to do about this scenario at the moment
+        [TestMethod]
+        public async Task TestFuncDynamicEnqueueMethod()
+        {
+            var queue = new TaskQueue();
+
+            var colletion = new BlockingCollection<int>();
+
+            async Task addToQueue(int n)
+            {
+                await Task.Delay(_delay);
+                colletion.Add(n);
+            }
+
+            var lastTask = Task.CompletedTask;
+
+            foreach (var i in Enumerable.Range(0, _iterations))
+            {
+                Func<dynamic> f = () => addToQueue(i);
+                lastTask = queue.Enqueue(f);
+            }
+
+            await lastTask;
+
+            //ValidateCollection(colletion);
         }
 
 
