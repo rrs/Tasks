@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Rrs.TaskControl.Pulsable
 {
@@ -10,20 +11,23 @@ namespace Rrs.TaskControl.Pulsable
     internal abstract class AbstractPulseWorker : IPulseWorker, IDisposable
     {
         private readonly AutoResetEvent _pulseEvent = new AutoResetEvent(false);
+        private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly CancellationToken _cancellationToken;
         private RegisteredWaitHandle _registeredWaitHandle;
-
-        protected volatile bool Disposed;
 
         protected AbstractPulseWorker()
         {
+            _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationToken = _cancellationTokenSource.Token;
             RegisterWaitForPulse();
         }
 
         public void Dispose()
         {
-            Disposed = true;
+            _cancellationTokenSource.Cancel();
             _pulseEvent.Dispose();
             _registeredWaitHandle.Unregister(_pulseEvent);
+            _cancellationTokenSource.Dispose();
         }
 
         public void Pulse()
@@ -31,11 +35,19 @@ namespace Rrs.TaskControl.Pulsable
             _pulseEvent.Set();
         }
 
-        protected abstract void HandlePulse();
+        protected abstract Task HandlePulse(CancellationToken token);
 
-        protected void RegisterWaitForPulse()
+        private void RegisterWaitForPulse()
         {
-            _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_pulseEvent, (o, b) => HandlePulse(), null, Timeout.Infinite, true);
+            if (_cancellationToken.IsCancellationRequested) return;
+
+            WaitOrTimerCallback callback = delegate 
+            {
+                _registeredWaitHandle.Unregister(null);
+                HandlePulse(_cancellationToken).ContinueWith(t => RegisterWaitForPulse());
+            };
+
+            _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_pulseEvent, callback, null, Timeout.Infinite, true);
         }
     }
 }

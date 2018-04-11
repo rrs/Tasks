@@ -24,7 +24,7 @@ namespace Tests.Rrs.TaskControl
             var lastTask = Task.CompletedTask;
             foreach (var i in Enumerable.Range(0, _iterations))
             {
-                lastTask = queue.Enqueue(() =>
+                lastTask = queue.Enqueue(t =>
                 {
                     Thread.Sleep(_delay);
                     colletion.TryAdd(i);
@@ -47,7 +47,7 @@ namespace Tests.Rrs.TaskControl
 
             foreach (var i in Enumerable.Range(0, _iterations))
             {
-                var task = queue.Enqueue(() =>
+                var task = queue.Enqueue(t =>
                 {
                     Thread.Sleep(_delay);
                     return i;
@@ -78,7 +78,7 @@ namespace Tests.Rrs.TaskControl
 
             foreach (var i in Enumerable.Range(0, _iterations))
             {
-                lastTask = queue.Enqueue(() => addToQueue(i));
+                lastTask = queue.Enqueue(t => addToQueue(i));
             }
 
             await lastTask;
@@ -103,41 +103,13 @@ namespace Tests.Rrs.TaskControl
 
             foreach (var i in Enumerable.Range(0, _iterations))
             {
-                lastTask = queue.Enqueue(() => addToQueue(i)).ContinueWith(t => colletion.TryAdd(t.Result));
+                lastTask = queue.Enqueue(t => addToQueue(i)).ContinueWith(t => colletion.TryAdd(t.Result));
             }
 
             await lastTask;
 
             ValidateCollection(colletion);
         }
-
-        // not sure what to do about this scenario at the moment
-        [TestMethod]
-        public async Task TestFuncDynamicEnqueueMethod()
-        {
-            var queue = new TaskQueue();
-
-            var colletion = new BlockingCollection<int>();
-
-            async Task addToQueue(int n)
-            {
-                await Task.Delay(_delay);
-                colletion.Add(n);
-            }
-
-            var lastTask = Task.CompletedTask;
-
-            foreach (var i in Enumerable.Range(0, _iterations))
-            {
-                Func<dynamic> f = () => addToQueue(i);
-                lastTask = queue.Enqueue(f);
-            }
-
-            await lastTask;
-
-            //ValidateCollection(colletion);
-        }
-
 
         private void ValidateCollection(BlockingCollection<int> c)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rrs.TaskControl.Pulsable
@@ -15,15 +16,11 @@ namespace Rrs.TaskControl.Pulsable
             _pulsable = pulsable;
         }
 
-        public AsyncPulseWorker(Func<Task> pulseAction) : this(new AsyncPulsableAdapter(pulseAction)) { }
+        public AsyncPulseWorker(Func<CancellationToken, Task> pulseAction) : this(new AsyncPulsableAdapter(pulseAction)) { }
 
-        protected override void HandlePulse()
+        protected override Task HandlePulse(CancellationToken token)
         {
-            _pulsable.OnPulse().ContinueWith(t => 
-            {
-                if (Disposed) return;
-                RegisterWaitForPulse();
-            });
+            return _pulsable.OnPulse(token);
         }
     }
 }

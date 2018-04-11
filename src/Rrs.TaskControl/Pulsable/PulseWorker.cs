@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rrs.TaskControl.Pulsable
@@ -12,14 +13,14 @@ namespace Rrs.TaskControl.Pulsable
             _pulseWorker = new SyncPulseWorker(pulsable);
         }
 
-        public PulseWorker(Action pulseAction) : this(new SyncPulsableAdapter(pulseAction)) { }
+        public PulseWorker(Action<CancellationToken> pulseAction) : this(new SyncPulsableAdapter(pulseAction)) { }
 
         public PulseWorker(IAsyncPulsable pulsable)
         {
             _pulseWorker = new AsyncPulseWorker(pulsable);
         }
 
-        public PulseWorker(Func<Task> pulseAction) : this(new AsyncPulsableAdapter(pulseAction)) { }
+        public PulseWorker(Func<CancellationToken, Task> pulseAction) : this(new AsyncPulsableAdapter(pulseAction)) { }
 
         public void Dispose()
         {

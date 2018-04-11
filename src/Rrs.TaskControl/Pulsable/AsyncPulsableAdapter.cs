@@ -1,20 +1,21 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rrs.TaskControl.Pulsable
 {
     internal class AsyncPulsableAdapter : IAsyncPulsable
     {
-        private readonly Func<Task> _pulseAction;
+        private readonly Func<CancellationToken, Task> _pulseAction;
 
-        public AsyncPulsableAdapter(Func<Task> pulseAction)
+        public AsyncPulsableAdapter(Func<CancellationToken, Task> pulseAction)
         {
             _pulseAction = pulseAction;
         }
 
-        public Task OnPulse()
+        public Task OnPulse(CancellationToken token)
         {
-            return _pulseAction();
+            return _pulseAction(token);
         }
     }
 }

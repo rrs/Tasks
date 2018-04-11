@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Rrs.TaskControl.Pulsable
 {
@@ -7,16 +8,16 @@ namespace Rrs.TaskControl.Pulsable
     /// </summary>
     internal class SyncPulsableAdapter : IPulsable
     {
-        private readonly Action _pulseAction;
+        private readonly Action<CancellationToken> _pulseAction;
 
-        public SyncPulsableAdapter(Action pulseAction)
+        public SyncPulsableAdapter(Action<CancellationToken> pulseAction)
         {
             _pulseAction = pulseAction;
         }
 
-        public void OnPulse()
+        public void OnPulse(CancellationToken token)
         {
-            _pulseAction();
+            _pulseAction(token);
         }
     }
 }

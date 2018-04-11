@@ -1,40 +1,61 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rrs.TaskControl
 {
     internal class AsyncWorkWrapper : IDoSomeWork
     {
-        private readonly Func<Task> _a;
+        private readonly Func<CancellationToken, Task> _a;
         private readonly TaskCompletionSource<object> _tcs = new TaskCompletionSource<object>();
         public Task Task => _tcs.Task;
 
-        public AsyncWorkWrapper(Func<Task> a)
+        public AsyncWorkWrapper(Func<CancellationToken, Task> a)
         {
             _a = a;
         }
 
-        public Task Execute()
+        public Task Execute(CancellationToken token)
         {
-            _a().ContinueWith(t => _tcs.SetResult(null));
+            _a(token).ContinueWith(t =>
+            {
+                if (token.IsCancellationRequested)
+                {
+                    _tcs.SetCanceled();
+                }
+                else
+                {
+                    _tcs.SetResult(null);
+                }
+            });
             return _tcs.Task;
         }
     }
 
     internal class AsyncWorkWrapper<T> : IDoSomeWork
     {
-        private readonly Func<Task<T>> _f;
+        private readonly Func<CancellationToken, Task<T>> _f;
         private readonly TaskCompletionSource<T> _tcs = new TaskCompletionSource<T>();
         public Task<T> Task => _tcs.Task;
 
-        public AsyncWorkWrapper(Func<Task<T>> f)
+        public AsyncWorkWrapper(Func<CancellationToken, Task<T>> f)
         {
             _f = f;
         }
 
-        public Task Execute()
+        public Task Execute(CancellationToken token)
         {
-            _f().ContinueWith(t => _tcs.SetResult(t.Result));
+            _f(token).ContinueWith(t =>
+            {
+                if (token.IsCancellationRequested)
+                {
+                    _tcs.SetCanceled();
+                }
+                else
+                {
+                    _tcs.SetResult(t.Result);
+                }
+            });
             return _tcs.Task;
         }
     }
