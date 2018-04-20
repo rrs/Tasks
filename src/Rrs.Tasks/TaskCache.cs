@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-namespace Rrs.TaskControl
+namespace Rrs.Tasks
 {
     /// <summary>
     /// Ensures only one task is running for a given key. All callers during execution will receive the same result. On completion the task is removed.

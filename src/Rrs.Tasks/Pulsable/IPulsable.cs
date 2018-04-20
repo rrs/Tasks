@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace Rrs.TaskControl.Pulsable
+namespace Rrs.Tasks.Pulsable
 {
     public interface IPulsable
     {

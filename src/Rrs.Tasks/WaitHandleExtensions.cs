@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.TaskControl
+namespace Rrs.Tasks
 {
     public static class WaitHandleExtensions
     {

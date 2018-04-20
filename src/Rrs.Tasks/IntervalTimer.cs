@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Rrs.DateTimes;
+using System;
 using System.Threading;
 
-namespace Rrs.TaskControl
+namespace Rrs.Tasks
 {
     public class IntervalTimer
     {

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.TaskControl.Pulsable
+namespace Rrs.Tasks.Pulsable
 {
     internal class AsyncPulsableAdapter : IAsyncPulsable
     {

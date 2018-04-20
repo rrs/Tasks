@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.TaskControl.Pulsable
+namespace Rrs.Tasks.Pulsable
 {
     /// <summary>
     /// Core of the pulse worker logic. Provides the framework required to manage a single

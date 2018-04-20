@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rrs.TaskControl
+namespace Rrs.Tasks
 {
     public interface IRepeat
     {

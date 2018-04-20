@@ -1,10 +1,10 @@
-﻿using Rrs.TaskControl.Pulsable;
+﻿using Rrs.Tasks.Pulsable;
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.TaskControl
+namespace Rrs.Tasks
 {
     public sealed class TaskQueue : IDisposable
     {

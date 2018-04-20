@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.TaskControl
+namespace Rrs.Tasks
 {
     internal class SyncWorkWrapper : IDoSomeWork
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rrs.TaskControl
+namespace Rrs.Tasks
 {
     class RepeatedAction : IRepeat
     {

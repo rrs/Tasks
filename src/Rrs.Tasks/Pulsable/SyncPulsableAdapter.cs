@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Rrs.TaskControl.Pulsable
+namespace Rrs.Tasks.Pulsable
 {
     /// <summary>
     /// Adapter class

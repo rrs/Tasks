@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <AssemblyName>Tests.Rrs.Tasks</AssemblyName>
+
+    <RootNamespace>Tests.Rrs.Tasks</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -17,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rrs.TaskControl\Rrs.TaskControl.csproj" />
+    <ProjectReference Include="..\Rrs.Tasks\Rrs.Tasks.csproj" />
   </ItemGroup>
 
 </Project>
