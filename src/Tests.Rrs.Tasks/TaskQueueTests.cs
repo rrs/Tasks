@@ -11,7 +11,7 @@ namespace Tests.Rrs.TaskControl
     [TestClass]
     public class TaskQueueTests
     {
-        const int _delay = 10;
+        const int _delay = 20;
         const int _iterations = 50;
 
         [TestMethod]
@@ -24,10 +24,11 @@ namespace Tests.Rrs.TaskControl
             var lastTask = Task.CompletedTask;
             foreach (var i in Enumerable.Range(0, _iterations))
             {
+                var j = i;
                 lastTask = queue.Enqueue(t =>
                 {
                     Thread.Sleep(_delay);
-                    colletion.TryAdd(i);
+                    colletion.TryAdd(j);
                 });
             }
 
@@ -47,10 +48,11 @@ namespace Tests.Rrs.TaskControl
 
             foreach (var i in Enumerable.Range(0, _iterations))
             {
+                var j = i;
                 var task = queue.Enqueue(t =>
                 {
                     Thread.Sleep(_delay);
-                    return i;
+                    return j;
                 });
 
                 lastTask = task.ContinueWith(t => colletion.TryAdd(t.Result));
@@ -78,7 +80,8 @@ namespace Tests.Rrs.TaskControl
 
             foreach (var i in Enumerable.Range(0, _iterations))
             {
-                lastTask = queue.Enqueue(t => addToQueue(i));
+                var j = i;
+                lastTask = queue.Enqueue(t => addToQueue(j));
             }
 
             await lastTask;
@@ -103,7 +106,8 @@ namespace Tests.Rrs.TaskControl
 
             foreach (var i in Enumerable.Range(0, _iterations))
             {
-                lastTask = queue.Enqueue(t => addToQueue(i)).ContinueWith(t => colletion.TryAdd(t.Result));
+                var j = i;
+                lastTask = queue.Enqueue(t => addToQueue(j)).ContinueWith(t => colletion.TryAdd(t.Result));
             }
 
             await lastTask;
