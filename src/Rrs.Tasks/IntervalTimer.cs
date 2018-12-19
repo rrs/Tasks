@@ -1,5 +1,6 @@
 ﻿using Rrs.DateTimes;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Rrs.Tasks
@@ -46,8 +47,8 @@ namespace Rrs.Tasks
             _r.OnRepeat();          // run the timed task
             _runningEvent.Set();    // set the gate to open
             if (_cancelled) return;
-            var now = DateTime.Now; // keep ref to now to prevent 'overshoot'
-            var delay = now.RoundUp(_r.Rate) - now; // get the next interval less now to give how long we need to wait
+            var now = DateTime.Now; // keep ref to now to prevent 'drift'
+            var delay = now.RoundToNearest(_r.Rate).Add(_r.Rate) - now; // get the next interval less now to give how long we need to wait
             _t.Change((int)delay.TotalMilliseconds, Timeout.Infinite); // set timer going again
         }
     }
