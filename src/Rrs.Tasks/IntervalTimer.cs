@@ -41,18 +41,25 @@ namespace Rrs.Tasks
 
         private void Execute()
         {
-            var next = DateTime.Now.RoundToNearest(_r.Rate).Add(_r.Rate); // calculate the next desired time
-            if (_cancelled) return;
-            _runningEvent.Reset();  // set the gate to closed
-            _r.OnRepeat();          // run the timed task
-            _runningEvent.Set();    // set the gate to open
-            if (_cancelled) return;
+            try
+            {
+                var next = DateTime.Now.RoundToNearest(_r.Rate).Add(_r.Rate); // calculate the next desired time
+                if (_cancelled) return;
+                _runningEvent.Reset();  // set the gate to closed
+                _r.OnRepeat();          // run the timed task
+                _runningEvent.Set();    // set the gate to open
+                if (_cancelled) return;
 
-            var now = DateTime.Now;
-            var delay = next - now; // work out the delay after the execution has happened, it may take a while
+                var now = DateTime.Now;
+                var delay = next - now; // work out the delay after the execution has happened, it may take a while
 
-            delay = delay.TotalMilliseconds > 0 ? delay : (now.RoundUp(_r.Rate) - now); // when OnRepeat takes longer than the next interval round to the next
-            _t.Change((int)delay.TotalMilliseconds, Timeout.Infinite); // set timer going again. 
+                delay = delay.TotalMilliseconds > 0 ? delay : (now.RoundUp(_r.Rate) - now); // when OnRepeat takes longer than the next interval round to the next
+                _t.Change((int)delay.TotalMilliseconds, Timeout.Infinite); // set timer going again. 
+            }
+            catch(Exception e)
+            {
+                ThreadPool.QueueUserWorkItem(delegate { throw new Exception("IntervalTimer exception", e); });
+            }
         }
     }
 }
