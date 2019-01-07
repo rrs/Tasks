@@ -6,6 +6,8 @@ namespace Rrs.Tasks
 {
     public class IntervalTimer
     {
+        public static event Action<Exception> IntervalTimerException;
+
         private readonly IRepeat _r;
         private Timer _t;
         private volatile bool _cancelled;
@@ -58,7 +60,7 @@ namespace Rrs.Tasks
             }
             catch(Exception e)
             {
-                ThreadPool.QueueUserWorkItem(delegate { throw new Exception("IntervalTimer exception", e); });
+                IntervalTimerException?.Invoke(new Exception("IntervalTimer exception", e));
             }
         }
     }
