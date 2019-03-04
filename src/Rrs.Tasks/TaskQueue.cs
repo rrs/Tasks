@@ -18,6 +18,12 @@ namespace Rrs.Tasks
             _pw = new PulseWorker(t => taskQueueConsumer.ConsumeQueue(_queue, t));
         }
 
+        public TaskQueue(ITaskQueuePulsable taskQueuePulsable, ITaskQueueConsumer taskQueueConsumer = null)
+        {
+            if (taskQueueConsumer == null) taskQueueConsumer = new TaskQueueConsumer();
+            _pw = new PulseWorker(t => taskQueuePulsable.OnPulse(taskQueueConsumer, _queue, t));
+        }
+
         public void Dispose()
         {
             _pw.Dispose();
