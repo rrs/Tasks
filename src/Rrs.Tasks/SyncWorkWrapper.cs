@@ -17,15 +17,16 @@ namespace Rrs.Tasks
 
         public Task Execute(CancellationToken token)
         {
-            _a(token);
             if (token.IsCancellationRequested)
             {
                 _tcs.SetCanceled();
             }
             else
             {
+                _a(token);
                 _tcs.SetResult(null);
             }
+            
             return _tcs.Task;
         }
     }
@@ -43,13 +44,13 @@ namespace Rrs.Tasks
 
         public Task Execute(CancellationToken token)
         {
-            var r = _f(token);
             if (token.IsCancellationRequested)
             {
                 _tcs.SetCanceled();
             }
             else
             {
+                var r = _f(token);
                 _tcs.SetResult(r);
             }
             return _tcs.Task;

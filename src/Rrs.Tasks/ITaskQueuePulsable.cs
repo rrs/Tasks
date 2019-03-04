@@ -5,6 +5,6 @@ namespace Rrs.Tasks
 {
     public interface ITaskQueuePulsable
     {
-        void OnPulse(ITaskQueueConsumer taskQueueConsumer, ConcurrentQueue<IDoSomeWork> queue, CancellationToken cancellationToken);
+        void OnPulse(ITaskQueueConsumer taskQueueConsumer, ConcurrentQueue<IDoSomeWork> queue, CancellationTokenSource cancellationTokenSource);
     }
 }

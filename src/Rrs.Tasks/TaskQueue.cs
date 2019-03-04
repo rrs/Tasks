@@ -8,20 +8,38 @@ namespace Rrs.Tasks
 {
     public sealed class TaskQueue : IDisposable
     {
-        private readonly ConcurrentQueue<IDoSomeWork> _queue = new ConcurrentQueue<IDoSomeWork>();
+        private ConcurrentQueue<IDoSomeWork> _queue = new ConcurrentQueue<IDoSomeWork>();
 
         private readonly PulseWorker _pw;
 
         public TaskQueue(ITaskQueueConsumer taskQueueConsumer = null)
         {
             if (taskQueueConsumer == null) taskQueueConsumer = new TaskQueueConsumer();
-            _pw = new PulseWorker(t => taskQueueConsumer.ConsumeQueue(_queue, t));
+            _pw = new PulseWorker(t => RunWithConsumer(taskQueueConsumer, t));
+        }
+
+        private void RunWithConsumer(ITaskQueueConsumer taskQueueConsumer, CancellationToken t)
+        {
+            taskQueueConsumer.ConsumeQueue(_queue, t);
+        }
+
+        private void ReplaceQueue(CancellationToken t)
+        {
+            var oldQueue = Interlocked.Exchange(ref _queue, new ConcurrentQueue<IDoSomeWork>());
+            foreach (var task in oldQueue) task.Execute(t);
         }
 
         public TaskQueue(ITaskQueuePulsable taskQueuePulsable, ITaskQueueConsumer taskQueueConsumer = null)
         {
             if (taskQueueConsumer == null) taskQueueConsumer = new TaskQueueConsumer();
-            _pw = new PulseWorker(t => taskQueuePulsable.OnPulse(taskQueueConsumer, _queue, t));
+            _pw = new PulseWorker(t => RunWithPulsable(taskQueuePulsable, taskQueueConsumer, t));
+        }
+
+        private void RunWithPulsable(ITaskQueuePulsable taskQueuePulsable, ITaskQueueConsumer taskQueueConsumer, CancellationToken t)
+        {
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(t);
+            cts.Token.Register(() => ReplaceQueue(cts.Token));
+            taskQueuePulsable.OnPulse(taskQueueConsumer, _queue, cts);
         }
 
         public void Dispose()
