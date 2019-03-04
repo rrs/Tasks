@@ -18,9 +18,9 @@ namespace Rrs.Tasks
             _pw = new PulseWorker(t => RunWithConsumer(taskQueueConsumer, t));
         }
 
-        private void RunWithConsumer(ITaskQueueConsumer taskQueueConsumer, CancellationToken t)
+        private Task RunWithConsumer(ITaskQueueConsumer taskQueueConsumer, CancellationToken t)
         {
-            taskQueueConsumer.ConsumeQueue(_queue, t);
+            return taskQueueConsumer.ConsumeQueue(_queue, t);
         }
 
         private void ReplaceQueue(CancellationToken t)
@@ -35,11 +35,11 @@ namespace Rrs.Tasks
             _pw = new PulseWorker(t => RunWithPulsable(taskQueuePulsable, taskQueueConsumer, t));
         }
 
-        private void RunWithPulsable(ITaskQueuePulsable taskQueuePulsable, ITaskQueueConsumer taskQueueConsumer, CancellationToken t)
+        private Task RunWithPulsable(ITaskQueuePulsable taskQueuePulsable, ITaskQueueConsumer taskQueueConsumer, CancellationToken t)
         {
             var cts = CancellationTokenSource.CreateLinkedTokenSource(t);
             cts.Token.Register(() => ReplaceQueue(cts.Token));
-            taskQueuePulsable.OnPulse(taskQueueConsumer, _queue, cts);
+            return taskQueuePulsable.OnPulse(taskQueueConsumer, _queue, cts);
         }
 
         public void Dispose()
