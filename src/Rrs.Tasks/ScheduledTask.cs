@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace Rrs.Tasks
@@ -21,7 +19,7 @@ namespace Rrs.Tasks
             scheduled?.Cancel();
         }
 
-        public void ScheduleIn(DateTime datetime)
+        public void ScheduleAt(DateTime datetime)
         {
             var timeSpan = datetime - DateTime.Now;
             var scheduled = Interlocked.Exchange(ref _scheduled, Schedule.In(_action, timeSpan));
