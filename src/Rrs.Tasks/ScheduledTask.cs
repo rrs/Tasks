@@ -6,7 +6,7 @@ namespace Rrs.Tasks
     public class ScheduledTask
     {
         private readonly Action _action;
-        private volatile ScheduledOperation _scheduled;
+        private CancellationTokenSource _cts;
 
         public ScheduledTask(Action action)
         {
@@ -15,20 +15,22 @@ namespace Rrs.Tasks
 
         public void ScheduleIn(TimeSpan timeSpan)
         {
-            var scheduled = Interlocked.Exchange(ref _scheduled, Schedule.In(_action, timeSpan));
-            scheduled?.Cancel();
+            var cts = Interlocked.Exchange(ref _cts, new CancellationTokenSource());
+            cts?.Cancel();
+            Schedule.In(_action, timeSpan, _cts.Token);
         }
 
         public void ScheduleAt(DateTime datetime)
         {
             var timeSpan = datetime - DateTime.Now;
-            var scheduled = Interlocked.Exchange(ref _scheduled, Schedule.In(_action, timeSpan));
-            scheduled?.Cancel();
+            var cts = Interlocked.Exchange(ref _cts, new CancellationTokenSource());
+            cts?.Cancel();
+            Schedule.In(_action, timeSpan, _cts.Token);
         }
 
         public void Cancel()
         {
-            _scheduled?.Cancel();
+            _cts?.Cancel();
         }
     }
 }

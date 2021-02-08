@@ -12,8 +12,8 @@ namespace Rrs.Tasks
 
         private readonly IRepeatAsync _r;
         private Timer _t;
-        private volatile bool _cancelled;
-
+        private volatile int _cancelled;
+        private bool Cancelled => Interlocked.CompareExchange(ref _cancelled, 0, 0) == 1;
         private readonly ManualResetEvent _runningEvent = new ManualResetEvent(true);
 
         // allows us to block callers if the OnRepeat of the IRepeat is running
@@ -46,8 +46,8 @@ namespace Rrs.Tasks
 
         public void Cancel()
         {
-            if (_cancelled) return;
-            _cancelled = true;
+            if (Interlocked.Exchange(ref _cancelled, 1) == 1) return;
+
             _t.Change(Timeout.Infinite, Timeout.Infinite);
             _t.Dispose();
         }
@@ -57,12 +57,12 @@ namespace Rrs.Tasks
             try
             {
                 var next = DateTime.Now.RoundToNearest(_r.Rate).Add(_r.Rate); // calculate the next desired time
-                if (_cancelled) return;
+                if (Cancelled) return;
                 _runningEvent.Reset();  // set the gate to closed
                 _r.OnRepeat().ContinueWith(t => 
                 {
                     _runningEvent.Set();    // set the gate to open
-                    if (_cancelled) return;
+                    if (Cancelled) return;
 
                     var now = DateTime.Now;
                     var delay = next - now; // work out the delay after the execution has happened, it may take a while
