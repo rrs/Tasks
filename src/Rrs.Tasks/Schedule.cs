@@ -6,7 +6,7 @@ namespace Rrs.Tasks
 {
     public static class Schedule
     {
-        public static Task In(Action a, TimeSpan timespan, CancellationToken token)
+        public static Task In(Action a, TimeSpan timespan, CancellationToken token = default)
         {
             return Task.Run(async () =>
             {
@@ -15,7 +15,7 @@ namespace Rrs.Tasks
             });
         }
 
-        public static Task In(Func<Task> a, TimeSpan timespan, CancellationToken token)
+        public static Task In(Func<Task> a, TimeSpan timespan, CancellationToken token = default)
         {
             return Task.Run(async () =>
             {
