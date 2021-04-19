@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Tests.Rrs.TaskControl
+namespace Tests.Rrs.Tasks
 {
     [TestClass]
     public class TaskQueueTests
