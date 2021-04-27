@@ -11,12 +11,12 @@ namespace Rrs.Tasks.Pulsable
     {
         private readonly IAsyncPulsable _pulsable;
 
-        public AsyncPulseWorker(IAsyncPulsable pulsable)
+        public AsyncPulseWorker(IAsyncPulsable pulsable, PulseWorkerOptions options = null) : base(options)
         {
             _pulsable = pulsable;
         }
 
-        public AsyncPulseWorker(Func<CancellationToken, Task> pulseAction) : this(new AsyncPulsableAdapter(pulseAction)) { }
+        public AsyncPulseWorker(Func<CancellationToken, Task> pulseAction, PulseWorkerOptions options = null) : this(new AsyncPulsableAdapter(pulseAction), options) { }
 
         protected override Task HandlePulse(CancellationToken token)
         {

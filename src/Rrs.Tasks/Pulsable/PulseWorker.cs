@@ -8,19 +8,19 @@ namespace Rrs.Tasks.Pulsable
     {
         private readonly AbstractPulseWorker _pulseWorker;
 
-        public PulseWorker(IPulsable pulsable)
+        public PulseWorker(IPulsable pulsable, PulseWorkerOptions options = null)
         {
-            _pulseWorker = new SyncPulseWorker(pulsable);
+            _pulseWorker = new SyncPulseWorker(pulsable, options);
         }
 
-        public PulseWorker(Action<CancellationToken> pulseAction) : this(new SyncPulsableAdapter(pulseAction)) { }
+        public PulseWorker(Action<CancellationToken> pulseAction, PulseWorkerOptions options = null) : this(new SyncPulsableAdapter(pulseAction), options) { }
 
-        public PulseWorker(IAsyncPulsable pulsable)
+        public PulseWorker(IAsyncPulsable pulsable, PulseWorkerOptions options = null)
         {
-            _pulseWorker = new AsyncPulseWorker(pulsable);
+            _pulseWorker = new AsyncPulseWorker(pulsable, options);
         }
 
-        public PulseWorker(Func<CancellationToken, Task> pulseAction) : this(new AsyncPulsableAdapter(pulseAction)) { }
+        public PulseWorker(Func<CancellationToken, Task> pulseAction, PulseWorkerOptions options = null) : this(new AsyncPulsableAdapter(pulseAction), options) { }
 
         public void Dispose()
         {
