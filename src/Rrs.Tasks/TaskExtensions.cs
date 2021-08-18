@@ -2,7 +2,7 @@
 
 namespace Tests.Rrs.TaskControl
 {
-    static class TaskExtensions
+    public static class TaskExtensions
     {
         public static void Forget(this Task task)
         {
