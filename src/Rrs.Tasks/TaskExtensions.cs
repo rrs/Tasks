@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Tests.Rrs.TaskControl
 {
@@ -29,6 +31,19 @@ namespace Tests.Rrs.TaskControl
                 {
                     // Nothing to do here
                 }
+            }
+        }
+
+
+        public static async Task TimeoutAfter(this Task task, TimeSpan timeout, CancellationToken token = default)
+        {
+            if (await Task.WhenAny(task, Task.Delay(timeout, token)) == task)
+			{
+                return;
+			}
+            else
+            {
+                throw new TimeoutException("The operation has timed out.");
             }
         }
     }

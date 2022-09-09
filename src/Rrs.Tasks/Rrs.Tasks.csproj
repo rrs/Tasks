@@ -5,7 +5,7 @@
     <Description>Rrs.Tasks Class Library</Description>
     <Authors>Robert Snipe</Authors>
     <Copyright>Copyright (c) 2018 Robert Snipe</Copyright>
-    <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
     <AssemblyName>Rrs.Tasks</AssemblyName>
     <PackageId>Rrs.Tasks</PackageId>
     <PackageTags>Tasks;Net452</PackageTags>
@@ -15,6 +15,6 @@
     <RootNamespace>Rrs.Tasks</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Rrs.DateTimes" Version="1.0.2" />
+    <PackageReference Include="Rrs.DateTimes" Version="1.1.0" />
   </ItemGroup>
 </Project>
