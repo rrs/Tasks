@@ -46,6 +46,18 @@ namespace Tests.Rrs.TaskControl
                 throw new TimeoutException("The operation has timed out.");
             }
         }
+
+        public static async Task<T> TimeoutAfter<T>(this Task<T> task, TimeSpan timeout, CancellationToken token = default)
+        {
+            if (await Task.WhenAny(task, Task.Delay(timeout, token)) == task)
+            {
+                return await task;
+            }
+            else
+            {
+                throw new TimeoutException("The operation has timed out.");
+            }
+        }
     }
 }
 
