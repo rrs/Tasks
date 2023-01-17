@@ -1,10 +1,9 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.Tasks.Pulsable
+namespace Rrs.Tasks.Pulsable;
+
+public interface IAsyncPulsable
 {
-    public interface IAsyncPulsable
-    {
-        Task OnPulse(CancellationToken token);
-    }
+    Task OnPulse(CancellationToken token);
 }

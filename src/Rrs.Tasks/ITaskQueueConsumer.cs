@@ -2,10 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.Tasks
+namespace Rrs.Tasks;
+
+public interface ITaskQueueConsumer
 {
-    public interface ITaskQueueConsumer
-    {
-        Task ConsumeQueue(ConcurrentQueue<IDoSomeWork> queue, CancellationToken token);
-    }
+    Task ConsumeQueue(ConcurrentQueue<IDoSomeWork> queue, CancellationToken token);
 }

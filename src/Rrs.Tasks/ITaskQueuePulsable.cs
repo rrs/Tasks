@@ -2,10 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.Tasks
+namespace Rrs.Tasks;
+
+public interface ITaskQueuePulsable
 {
-    public interface ITaskQueuePulsable
-    {
-        Task OnPulse(ITaskQueueConsumer taskQueueConsumer, ConcurrentQueue<IDoSomeWork> queue, CancellationTokenSource cancellationTokenSource);
-    }
+    Task OnPulse(ITaskQueueConsumer taskQueueConsumer, ConcurrentQueue<IDoSomeWork> queue, CancellationTokenSource cancellationTokenSource);
 }

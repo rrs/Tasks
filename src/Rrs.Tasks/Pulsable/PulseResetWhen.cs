@@ -1,8 +1,7 @@
-﻿namespace Rrs.Tasks.Pulsable
+﻿namespace Rrs.Tasks.Pulsable;
+
+public enum PulseResetWhen
 {
-    public enum PulseResetWhen
-    {
-        Before,
-        After
-    }
+    Before,
+    After
 }

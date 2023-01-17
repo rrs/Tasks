@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Rrs.Tasks
+namespace Rrs.Tasks;
+
+class RepeatedActionWrapper : IRepeatAsync
 {
-    class RepeatedActionWrapper : IRepeatAsync
+    private readonly IRepeat _r;
+    public TimeSpan Rate => _r.Rate;
+
+    public RepeatedActionWrapper(IRepeat r)
     {
-        private readonly IRepeat _r;
-        public TimeSpan Rate => _r.Rate;
+        _r = r;
+    }
 
-        public RepeatedActionWrapper(IRepeat r)
-        {
-            _r = r;
-        }
-
-        public Task OnRepeat()
-        {
-            _r.OnRepeat();
-            var tcs = new TaskCompletionSource<object>();
-            tcs.SetResult(null);
-            return tcs.Task;
-        }
+    public Task OnRepeat()
+    {
+        _r.OnRepeat();
+        var tcs = new TaskCompletionSource<object>();
+        tcs.SetResult(null);
+        return tcs.Task;
     }
 }

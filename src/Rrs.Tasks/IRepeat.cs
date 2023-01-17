@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace Rrs.Tasks
+namespace Rrs.Tasks;
+
+public interface IRepeat
 {
-    public interface IRepeat
-    {
-        TimeSpan Rate { get; }
-        void OnRepeat();
-    }
+    TimeSpan Rate { get; }
+    void OnRepeat();
 }

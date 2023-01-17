@@ -2,20 +2,19 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rrs.Tasks
+namespace Rrs.Tasks;
+
+internal class TaskQueueConsumer : ITaskQueueConsumer
 {
-    internal class TaskQueueConsumer : ITaskQueueConsumer
+    public async Task ConsumeQueue(ConcurrentQueue<IDoSomeWork> queue, CancellationToken token)
     {
-        public async Task ConsumeQueue(ConcurrentQueue<IDoSomeWork> queue, CancellationToken token)
+        if (token.IsCancellationRequested)
         {
-            if (token.IsCancellationRequested)
-            {
-                return;
-            };
-            while(queue.TryDequeue(out var workWrapper))
-            {
-                await workWrapper.Execute(token);
-            }
+            return;
+        };
+        while(queue.TryDequeue(out var workWrapper))
+        {
+            await workWrapper.Execute(token);
         }
     }
 }

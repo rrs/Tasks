@@ -1,7 +1,6 @@
-﻿namespace Rrs.Tasks.Pulsable
+﻿namespace Rrs.Tasks.Pulsable;
+
+public interface IPulseWorker
 {
-    public interface IPulseWorker
-    {
-        void Pulse();
-    }
+    void Pulse();
 }

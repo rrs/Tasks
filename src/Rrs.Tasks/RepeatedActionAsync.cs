@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Rrs.Tasks
+namespace Rrs.Tasks;
+
+class RepeatedActionAsync : IRepeatAsync
 {
-    class RepeatedActionAsync : IRepeatAsync
+    public TimeSpan Rate { get; }
+
+    private readonly Func<Task> _f;
+    public RepeatedActionAsync(TimeSpan rate, Func<Task> f)
     {
-        public TimeSpan Rate { get; }
+        Rate = rate;
+        _f = f;
+    }
 
-        private readonly Func<Task> _f;
-        public RepeatedActionAsync(TimeSpan rate, Func<Task> f)
-        {
-            Rate = rate;
-            _f = f;
-        }
-
-        public Task OnRepeat()
-        {
-            return _f();
-        }
+    public Task OnRepeat()
+    {
+        return _f();
     }
 }

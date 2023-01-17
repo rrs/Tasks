@@ -6,21 +6,20 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.Rrs.Tasks
+namespace Tests.Rrs.Tasks;
+
+[TestClass]
+public class ScheduleTests
 {
-    [TestClass]
-    public class ScheduleTests
+    [TestMethod]
+    public async Task TestScheduleIn()
     {
-        [TestMethod]
-        public async Task TestScheduleIn()
-        {
-            var sw = new Stopwatch();
-            Action a = sw.Stop;
+        var sw = new Stopwatch();
+        Action a = sw.Stop;
 
-            sw.Start();
-            await Schedule.In(a, TimeSpan.FromSeconds(1));
+        sw.Start();
+        await Schedule.In(a, TimeSpan.FromSeconds(1));
 
-            Assert.IsTrue(sw.ElapsedMilliseconds > 900);
-        }
+        Assert.IsTrue(sw.ElapsedMilliseconds > 900);
     }
 }
