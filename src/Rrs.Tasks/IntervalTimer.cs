@@ -1,20 +1,20 @@
 ﻿using Rrs.DateTimes;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rrs.Tasks;
 
-public class IntervalTimer
+public class IntervalTimer : IDisposable
 {
-    public static event Action<Exception> IntervalTimerException;
+    public static event EventHandler<Exception> IntervalTimerException;
 
     private readonly IRepeatAsync _r;
     private Timer _t;
     private volatile int _cancelled;
+
     private bool Cancelled => Interlocked.CompareExchange(ref _cancelled, 0, 0) == 1;
-    private readonly ManualResetEvent _runningEvent = new ManualResetEvent(true);
+    private readonly ManualResetEvent _runningEvent = new(true);
 
     // allows us to block callers if the OnRepeat of the IRepeat is running
     public void Wait() => _runningEvent.WaitOne();
@@ -30,7 +30,6 @@ public class IntervalTimer
     {
         _r = r;
     }
-
 
     public IntervalTimer(TimeSpan rate, Action a) : this(new RepeatedAction(rate, a)) { }
     public IntervalTimer(TimeSpan rate, Func<Task> f) : this(new RepeatedActionAsync(rate, f)) { }
@@ -48,8 +47,8 @@ public class IntervalTimer
     {
         if (Interlocked.Exchange(ref _cancelled, 1) == 1) return;
 
-        _t.Change(Timeout.Infinite, Timeout.Infinite);
-        _t.Dispose();
+        _t?.Change(Timeout.Infinite, Timeout.Infinite);
+        _t?.Dispose();
     }
 
     private async void Execute()
@@ -71,7 +70,27 @@ public class IntervalTimer
         }
         catch(Exception e)
         {
-            IntervalTimerException?.Invoke(new Exception("IntervalTimer exception", e));
+            IntervalTimerException?.Invoke(this, e);
         }
+    }
+
+    private bool _disposedValue;
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                Cancel();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

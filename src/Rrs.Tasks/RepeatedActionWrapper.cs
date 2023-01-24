@@ -16,8 +16,6 @@ class RepeatedActionWrapper : IRepeatAsync
     public Task OnRepeat()
     {
         _r.OnRepeat();
-        var tcs = new TaskCompletionSource<object>();
-        tcs.SetResult(null);
-        return tcs.Task;
+        return Task.CompletedTask;
     }
 }

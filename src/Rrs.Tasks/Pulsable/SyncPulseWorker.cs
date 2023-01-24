@@ -21,8 +21,6 @@ internal sealed class SyncPulseWorker : AbstractPulseWorker
     protected override Task HandlePulse(CancellationToken token)
     {
         _pulsable.OnPulse(token);
-        var tcs = new TaskCompletionSource<object>();
-        tcs.SetResult(null);
-        return tcs.Task;
+        return Task.CompletedTask;
     }
 }

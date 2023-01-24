@@ -43,14 +43,14 @@ internal abstract class AbstractPulseWorker : IPulseWorker, IDisposable
     {
         if (_cancellationToken.IsCancellationRequested) return;
 
-        WaitOrTimerCallback callback = async delegate 
+        async void callback(object state, bool timedOut)
         {
             _registeredWaitHandle.Unregister(null);
             if (_options.ResetRelativeToAction == PulseResetWhen.Before) _pulseEvent.Reset();
             await HandlePulse(_cancellationToken);
             if (_options.ResetRelativeToAction == PulseResetWhen.After) _pulseEvent.Reset();
             RegisterWaitForPulse();
-        };
+        }
 
         _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_pulseEvent, callback, null, Timeout.Infinite, true);
     }
