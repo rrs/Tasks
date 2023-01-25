@@ -2,11 +2,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Rrs.Tasks;
 
@@ -15,43 +13,35 @@ public class IntervalTimerPool : IDisposable
     public static event EventHandler<Exception> IntervalTimerException;
 
     private Timer _t;
-    private volatile int _cancelled;
-    private bool Cancelled => Interlocked.CompareExchange(ref _cancelled, 0, 0) == 1;
+    private CancellationTokenSource _cts;
+    private bool Cancelled => _cts.IsCancellationRequested;
     private readonly ManualResetEvent _runningEvent = new(true);
 
     private readonly ConcurrentDictionary<TimeSpan, RepeatList> _repeats = new();
 
     public IntervalTimerPool() { }
 
-    public IntervalTimerPool(IEnumerable<IRepeat> repeats)
+    public IntervalTimerPool(IEnumerable<RepeatList> repeats)
     {
         foreach(var r in repeats)
         {
-            this[r.Rate].Add(r);
+            _repeats.TryAdd(r.Rate, r);
         }
     }
 
-    public IntervalTimerPool(IEnumerable<IRepeatAsync> repeats)
+    public IntervalTimerPool(IEnumerable<(TimeSpan rate, Action<CancellationToken> a, int? priority)> repeats)
     {
-        foreach (var r in repeats)
+        foreach (var (rate, a, p) in repeats)
         {
-            this[r.Rate].Add(r);
+            this[rate].Add(a, p);
         }
     }
 
-    public IntervalTimerPool(IEnumerable<(TimeSpan rate, Action a)> repeats)
+    public IntervalTimerPool(IEnumerable<(TimeSpan rate, Func<CancellationToken,Task> f, int? priority)> repeats)
     {
-        foreach (var (rate, a) in repeats)
+        foreach (var (rate, f, p) in repeats)
         {
-            this[rate].Add(a);
-        }
-    }
-
-    public IntervalTimerPool(IEnumerable<(TimeSpan rate, Func<Task> f)> repeats)
-    {
-        foreach (var (rate, f) in repeats)
-        {
-            this[rate].Add(f);
+            this[rate].Add(f, p);
         }
     }
 
@@ -66,19 +56,24 @@ public class IntervalTimerPool : IDisposable
         {
             _t = new Timer(_ => Execute(), null, 0, Timeout.Infinite); // instant callback
             _nextRepeats = _repeats.Values.SelectMany(r => r).OrderBy(o => o.priority).Select(o => o.repeat);
+            _cts = new CancellationTokenSource();
+        }
+        else
+        {
+            _t.Change(0, Timeout.Infinite);
+            var oldCts = Interlocked.Exchange(ref _cts, new CancellationTokenSource());
+            oldCts?.Dispose();
         }
         return this;
     }
 
-    public void Cancel()
+    public void Stop()
     {
-        if (Interlocked.Exchange(ref _cancelled, 1) == 1) return;
-
         _t?.Change(Timeout.Infinite, Timeout.Infinite);
-        _t?.Dispose();
+        _cts?.Cancel();
     }
 
-    private IEnumerable<IRepeatAsync> _nextRepeats;
+    private IEnumerable<IDoAsync> _nextRepeats;
 
     private async void Execute()
     {
@@ -104,7 +99,7 @@ public class IntervalTimerPool : IDisposable
             foreach(var r in _nextRepeats)
             {
                 if (Cancelled) return;
-                await r.OnRepeat();
+                await r.Do(_cts.Token);
             }
             _runningEvent.Set(); // set the gate to open
             if (Cancelled) return;
@@ -127,7 +122,8 @@ public class IntervalTimerPool : IDisposable
         {
             if (disposing)
             {
-                Cancel();
+                _t?.Dispose();
+                _cts?.Dispose();
             }
             _disposedValue = true;
         }

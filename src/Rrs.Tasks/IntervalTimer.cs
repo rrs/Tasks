@@ -11,9 +11,9 @@ public class IntervalTimer : IDisposable
 
     private readonly IRepeatAsync _r;
     private Timer _t;
-    private volatile int _cancelled;
+    private CancellationTokenSource _cts;
 
-    private bool Cancelled => Interlocked.CompareExchange(ref _cancelled, 0, 0) == 1;
+    private bool Cancelled => _cts.IsCancellationRequested;
     private readonly ManualResetEvent _runningEvent = new(true);
 
     // allows us to block callers if the OnRepeat of the IRepeat is running
@@ -31,24 +31,29 @@ public class IntervalTimer : IDisposable
         _r = r;
     }
 
-    public IntervalTimer(TimeSpan rate, Action a) : this(new RepeatedAction(rate, a)) { }
-    public IntervalTimer(TimeSpan rate, Func<Task> f) : this(new RepeatedActionAsync(rate, f)) { }
+    public IntervalTimer(TimeSpan rate, Action<CancellationToken> a) : this(new RepeatedAction(rate, a)) { }
+    public IntervalTimer(TimeSpan rate, Func<CancellationToken, Task> f) : this(new RepeatedActionAsync(rate, f)) { }
 
     public IntervalTimer Start()
     {
         if (_t == null)
         {
             _t = new Timer(_ => Execute(), null, 0, Timeout.Infinite); // instant callback
+            _cts = new CancellationTokenSource();
+        }
+        else
+        {
+            _t.Change(0, Timeout.Infinite);
+            var oldCts = Interlocked.Exchange(ref _cts, new CancellationTokenSource());
+            oldCts?.Dispose();
         }
         return this;
     }
 
-    public void Cancel()
+    public void Stop()
     {
-        if (Interlocked.Exchange(ref _cancelled, 1) == 1) return;
-
         _t?.Change(Timeout.Infinite, Timeout.Infinite);
-        _t?.Dispose();
+        _cts?.Cancel();
     }
 
     private async void Execute()
@@ -58,7 +63,7 @@ public class IntervalTimer : IDisposable
             var next = DateTime.Now.RoundToNearest(_r.Rate).Add(_r.Rate); // calculate the next desired time
             if (Cancelled) return;
             _runningEvent.Reset();  // set the gate to closed
-            await _r.OnRepeat();
+            await _r.OnRepeat(_cts.Token);
             _runningEvent.Set();    // set the gate to open
             if (Cancelled) return;
 
@@ -81,7 +86,8 @@ public class IntervalTimer : IDisposable
         {
             if (disposing)
             {
-                Cancel();
+                _t?.Dispose();
+                _cts?.Dispose();
             }
             _disposedValue = true;
         }

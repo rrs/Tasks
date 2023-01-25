@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rrs.Tasks;
@@ -13,9 +14,9 @@ class RepeatedActionWrapper : IRepeatAsync
         _r = r;
     }
 
-    public Task OnRepeat()
+    public Task OnRepeat(CancellationToken cancellationToken)
     {
-        _r.OnRepeat();
+        _r.OnRepeat(cancellationToken);
         return Task.CompletedTask;
     }
 }

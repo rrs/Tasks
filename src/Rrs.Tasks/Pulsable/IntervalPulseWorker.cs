@@ -12,7 +12,7 @@ public class IntervalPulseWorker : IPulseWorker, IDisposable
     private IntervalPulseWorker(TimeSpan timeSpan, PulseWorker pulseWorker)
     {
         _pulseWorker = pulseWorker;
-        _timer = new IntervalTimer(timeSpan, _pulseWorker.Pulse);
+        _timer = new IntervalTimer(timeSpan, t => _pulseWorker.Pulse());
     }
 
     public IntervalPulseWorker(IPulsable pulsable, TimeSpan timeSpan) : this(timeSpan, new PulseWorker(pulsable)) { }
@@ -25,7 +25,7 @@ public class IntervalPulseWorker : IPulseWorker, IDisposable
 
     public void Dispose()
     {
-        _timer.Cancel();
+        _timer.Dispose();
         _pulseWorker.Dispose();
     }
 
