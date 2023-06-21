@@ -17,6 +17,11 @@ public class IntervalTimerPool : IDisposable
     private bool Cancelled => _cts.IsCancellationRequested;
     private readonly ManualResetEvent _runningEvent = new(true);
 
+    // allows us to block callers if the OnRepeat of the IRepeat is running
+    public void Wait() => _runningEvent.WaitOne();
+
+    public Task WaitAsync() => _runningEvent.WaitOneAsync();
+    
     private readonly ConcurrentDictionary<TimeSpan, RepeatList> _repeats = new();
 
     public IntervalTimerPool() { }
@@ -71,6 +76,19 @@ public class IntervalTimerPool : IDisposable
     {
         _t?.Change(Timeout.Infinite, Timeout.Infinite);
         _cts?.Cancel();
+    }
+
+    public void Restart(bool resetRepeatedActions = false)
+    {
+        if (_t == null) return;
+        
+        if (resetRepeatedActions)
+        {
+            _nextRepeats = _repeats.Values.SelectMany(r => r).OrderBy(o => o.priority).Select(o => o.repeat);
+        }
+        _t.Change(0, Timeout.Infinite);
+        var oldCts = Interlocked.Exchange(ref _cts, new CancellationTokenSource());
+        oldCts?.Dispose();
     }
 
     private IEnumerable<IDoAsync> _nextRepeats;
