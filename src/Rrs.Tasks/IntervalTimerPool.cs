@@ -81,7 +81,11 @@ public class IntervalTimerPool : IDisposable
     public void Restart(bool resetRepeatedActions = false)
     {
         if (_t == null) return;
-        
+
+        _t?.Change(Timeout.Infinite, Timeout.Infinite);
+        _cts?.Cancel();
+
+        Wait();
         if (resetRepeatedActions)
         {
             _nextRepeats = _repeats.Values.SelectMany(r => r).OrderBy(o => o.priority).Select(o => o.repeat);
