@@ -11,6 +11,7 @@ namespace Rrs.Tasks
             return Task.Run(async () =>
             {
                 await Task.Delay((int)timespan.TotalMilliseconds, token);
+                if (token.IsCancellationRequested) return;
                 a();
             });
         }
@@ -20,6 +21,7 @@ namespace Rrs.Tasks
             return Task.Run(async () =>
             {
                 await Task.Delay((int)timespan.TotalMilliseconds, token);
+                if (token.IsCancellationRequested) return;
                 await a();
             });
         }

@@ -35,8 +35,8 @@ namespace Rrs.Tasks
         // keeps track of a task and the context it was started in
         private class CachedTask<T>
         {
-            public object Id { get; set; }
-            public Lazy<Task<T>> Task { get; set; } // lazy so the task is only run once
+            public object Id { get; }
+            public Lazy<Task<T>> Task { get; } // lazy so the task is only invoked once
 
             public CachedTask(object id, Func<Task<T>> task)
             {
