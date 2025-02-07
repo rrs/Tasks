@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>2.5.0</Version>
     <LangVersion>default</LangVersion>
     <Description>Rrs.Tasks Class Library</Description>
     <Authors>Robert Snipe</Authors>
     <Copyright>Copyright (c) 2018 Robert Snipe</Copyright>
-    <TargetFrameworks>netstandard2.0;net462;net5.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462;net8.0</TargetFrameworks>
     <AssemblyName>Rrs.Tasks</AssemblyName>
     <PackageId>Rrs.Tasks</PackageId>
     <PackageTags>Tasks;Net462</PackageTags>
