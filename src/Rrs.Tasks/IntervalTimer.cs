@@ -1,12 +1,11 @@
 ﻿using Rrs.DateTimes;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Rrs.Tasks
 {
-    public class IntervalTimer
+    public class IntervalTimer : IDisposable
     {
         public static event Action<Exception> IntervalTimerException;
 
@@ -73,6 +72,11 @@ namespace Rrs.Tasks
             {
                 IntervalTimerException?.Invoke(new Exception("IntervalTimer exception", e));
             }
+        }
+
+        public void Dispose()
+        {
+            Cancel();
         }
     }
 }
