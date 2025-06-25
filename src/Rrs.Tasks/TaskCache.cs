@@ -13,9 +13,22 @@ public class TaskCache<TKey>
 
     public async Task<T> GetOrStart<T>(TKey key, Func<Task<T>> taskFactory)
     {
-        T result = default!;
-        await GetOrStart(key, async () => result = await taskFactory());
-        return result;
+        var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        await GetOrStart(key, async () =>
+        {
+            try
+            {
+                var result = await taskFactory();
+                tcs.TrySetResult(result);
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+        });
+
+        return await tcs.Task;
     }
 
     public Task GetOrStart(TKey key, Func<Task> taskFactory)
