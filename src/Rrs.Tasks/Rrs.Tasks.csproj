@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>2.6.2</Version>
+    <Version>2.6.3</Version>
     <LangVersion>default</LangVersion>
     <Description>Rrs.Tasks Class Library</Description>
     <Authors>Robert Snipe</Authors>
@@ -16,6 +16,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Rrs.DateTimes" Version="1.1.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.6.1" />
   </ItemGroup>
 </Project>

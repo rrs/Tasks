@@ -13,24 +13,23 @@ public class TaskCache<TKey>
 
     public async Task<T> GetOrStart<T>(TKey key, Func<Task<T>> taskFactory)
     {
-        var executionId = new object(); // take a unique reference to this scope
-        var cachedTask = new CachedTask<T>(executionId, taskFactory);
-        cachedTask = (CachedTask<T>)await GetOrStart(key, executionId, cachedTask);
+        var cachedTask = new CachedTask<T>(taskFactory);
+        cachedTask = (CachedTask<T>)await GetOrStart(key, cachedTask);
         return await cachedTask.Task.Value;
     }
 
     public async Task RunOrStart(TKey key, Func<Task> taskFactory)
     {
-        var executionId = new object(); // take a unique reference to this scope
-        var cachedTask = new CachedTask(executionId, taskFactory);
-        await GetOrStart(key, executionId, cachedTask);
+        var cachedTask = new CachedTask(taskFactory);
+        await GetOrStart(key, cachedTask);
     }
 
-    private async Task<ICachedTask> GetOrStart(TKey key, object executionId, ICachedTask cachedTask)
+    private async Task<ICachedTask> GetOrStart(TKey key, ICachedTask cachedTask)
     {
+        object executionId = cachedTask.Id; // take a ref to this CachedTask Id
         try
         {
-            // multiple threads could create instances of cachedtask which is cheap. Only the one added to the dictionary will be used
+            // multiple threads create instances of CachedTask which is cheap. Only the one added to the dictionary will be used and returned
             cachedTask = _taskCache.GetOrAdd(key, cachedTask);
             // invoking the cachedtask's value starts the task, and only once
             await cachedTask.Task;
@@ -55,28 +54,26 @@ public class TaskCache<TKey>
     // keeps track of a task and the context it was started in
     private class CachedTask : ICachedTask
     {
-        public object Id { get; }
+        public object Id { get; } = new();
         public Lazy<Task> Task { get; } // lazy so the task is only run once
+
         Task ICachedTask.Task => Task.Value; 
 
-        public CachedTask(object id, Func<Task> task)
+        public CachedTask(Func<Task> task)
         {
-            Id = id;
             Task = new Lazy<Task>(task);
         }
     }
 
-    // keeps track of a task and the context it was started in
     private class CachedTask<T> : ICachedTask
     {
-        public object Id { get; }
-        public Lazy<Task<T>> Task { get; } // lazy so the task is only run once
+        public object Id { get; } = new();
+        public Lazy<Task<T>> Task { get; }
         
         Task ICachedTask.Task => Task.Value;
 
-        public CachedTask(object id, Func<Task<T>> task)
+        public CachedTask(Func<Task<T>> task)
         {
-            Id = id;
             Task = new Lazy<Task<T>>(task);
         }
     }
