@@ -9,38 +9,32 @@ namespace Rrs.Tasks;
 /// </summary>
 public class TaskCache<TKey>
 {
-    private readonly ConcurrentDictionary<TKey, CachedTask> _taskCache = new ConcurrentDictionary<TKey, CachedTask>();
+    private readonly ConcurrentDictionary<TKey, ICachedTask> _taskCache = new();
 
     public async Task<T> GetOrStart<T>(TKey key, Func<Task<T>> taskFactory)
     {
-        var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        await GetOrStart(key, async () =>
-        {
-            try
-            {
-                var result = await taskFactory();
-                tcs.TrySetResult(result);
-            }
-            catch (Exception ex)
-            {
-                tcs.TrySetException(ex);
-            }
-        });
-
-        return await tcs.Task;
+        var executionId = new object(); // take a unique reference to this scope
+        var cachedTask = new CachedTask<T>(executionId, taskFactory);
+        cachedTask = (CachedTask<T>)await GetOrStart(key, executionId, cachedTask);
+        return await cachedTask.Task.Value;
     }
 
-    public Task GetOrStart(TKey key, Func<Task> taskFactory)
+    public async Task RunOrStart(TKey key, Func<Task> taskFactory)
     {
         var executionId = new object(); // take a unique reference to this scope
-        CachedTask cachedTask = null;
+        var cachedTask = new CachedTask(executionId, taskFactory);
+        await GetOrStart(key, executionId, cachedTask);
+    }
+
+    private async Task<ICachedTask> GetOrStart(TKey key, object executionId, ICachedTask cachedTask)
+    {
         try
         {
             // multiple threads could create instances of cachedtask which is cheap. Only the one added to the dictionary will be used
-            cachedTask = _taskCache.GetOrAdd(key, new CachedTask(executionId, taskFactory));
+            cachedTask = _taskCache.GetOrAdd(key, cachedTask);
             // invoking the cachedtask's value starts the task, and only once
-            return cachedTask.Task.Value;
+            await cachedTask.Task;
+            return cachedTask;
         }
         finally
         {
@@ -52,16 +46,38 @@ public class TaskCache<TKey>
         }
     }
 
+    private interface ICachedTask
+    {
+        object Id { get; }
+        Task Task { get; }
+    }
+
     // keeps track of a task and the context it was started in
-    private class CachedTask
+    private class CachedTask : ICachedTask
     {
         public object Id { get; }
         public Lazy<Task> Task { get; } // lazy so the task is only run once
+        Task ICachedTask.Task => Task.Value; 
 
         public CachedTask(object id, Func<Task> task)
         {
             Id = id;
             Task = new Lazy<Task>(task);
+        }
+    }
+
+    // keeps track of a task and the context it was started in
+    private class CachedTask<T> : ICachedTask
+    {
+        public object Id { get; }
+        public Lazy<Task<T>> Task { get; } // lazy so the task is only run once
+        
+        Task ICachedTask.Task => Task.Value;
+
+        public CachedTask(object id, Func<Task<T>> task)
+        {
+            Id = id;
+            Task = new Lazy<Task<T>>(task);
         }
     }
 }
